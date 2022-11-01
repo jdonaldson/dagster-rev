@@ -23,11 +23,8 @@
         :alt: Twitter
         :target: https://twitter.com/dagster-rev
 
-.. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
-    :alt: Project generated with PyScaffold
-    :target: https://pyscaffold.org/
 
-|
+[![Python package](https://github.com/jdonaldson/dagster-rev/actions/workflows/python-package.yml/badge.svg)](https://github.com/jdonaldson/dagster-rev/actions/workflows/python-package.yml)
 
 ===========
 dagster-rev
