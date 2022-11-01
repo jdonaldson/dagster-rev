@@ -6,23 +6,33 @@ __author__ = "Justin Donaldson"
 __copyright__ = "Justin Donaldson"
 __license__ = "MIT"
 
+from dagster import asset
+from pandas import DataFrame, read_html, get_dummies
+from sklearn.linear_model import LinearRegression
 
-def test_fib():
-    """API Tests"""
-    assert fib(1) == 1
-    assert fib(2) == 1
-    assert fib(7) == 13
-    with pytest.raises(AssertionError):
-        fib(-10)
+@asset
+def country_populations() -> DataFrame:
+    df = read_html("https://tinyurl.com/mry64ebh")[0]
+    df.columns = ["country", "continent", "rg", "pop2018", "pop2019", "change"]
+    df["change"] = df["change"].str.rstrip("%").str.replace("−", "-").astype("float")
+    return df
+
+@asset
+def continent_change_model(country_populations: DataFrame) -> LinearRegression:
+    data = country_populations.dropna(subset=["change"])
+    return LinearRegression().fit(
+        get_dummies(data[["continent"]]), data["change"]
+    )
+
+@asset
+def continent_stats(
+    country_populations: DataFrame, continent_change_model: LinearRegression
+) -> DataFrame:
+    result = country_populations.groupby("continent").sum()
+    result["pop_change_factor"] = continent_change_model.coef_
+    return result
 
 
-def test_main(capsys):
-    """CLI Tests"""
-    # capsys is a pytest fixture that allows asserts against stdout/stderr
-    # https://docs.pytest.org/en/stable/capture.html
-    main(["7"])
-    captured = capsys.readouterr()
-    assert "The 7-th Fibonacci number is 13" in captured.out
 
 def test_stream():
     assert True
